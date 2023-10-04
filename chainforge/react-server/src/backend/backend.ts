@@ -566,12 +566,15 @@ export async function queryLLM(id: string,
     const past_cache_files: Dict = cache.cache_files;
     let past_cache_filenames: Array<string> = Object.keys(past_cache_files);
     llms.forEach(llm_spec => {
+      // If the user has specified to not use cache for this LLM, we don't need to check for cache
       let found_cache = false;
-      for (const [filename, cache_llm_spec] of Object.entries(past_cache_files)) {
-        if (matching_settings(cache_llm_spec, llm_spec)) {
-          llm_to_cache_filename[extract_llm_key(llm_spec)] = filename;
-          found_cache = true;
-          break;
+      if (llm_spec.formData.use_cache == true) {
+        for (const [filename, cache_llm_spec] of Object.entries(past_cache_files)) {
+          if (matching_settings(cache_llm_spec, llm_spec)) {
+            llm_to_cache_filename[extract_llm_key(llm_spec)] = filename;
+            found_cache = true;
+            break;
+          }
         }
       }
       if (!found_cache) {
